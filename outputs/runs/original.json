@@ -1,0 +1,158 @@
+{
+  "status": "completed",
+  "disposition": "human_review",
+  "reason": "All applicable configured checks completed.",
+  "findings": [
+    "missing_values"
+  ],
+  "tool_calls": 6,
+  "completed_tools": [
+    "load",
+    "profile",
+    "missing",
+    "duplicates",
+    "numeric",
+    "categories"
+  ],
+  "skipped_tools": [],
+  "observations": {
+    "load": {
+      "rows": 344,
+      "columns": 8,
+      "source": "pinned public CSV"
+    },
+    "profile": {
+      "missing_columns": [],
+      "extra_column_count": 0,
+      "measurement_columns": [
+        "bill_length_mm",
+        "bill_depth_mm",
+        "flipper_length_mm",
+        "body_mass_g"
+      ],
+      "category_columns": [
+        "species",
+        "island",
+        "sex"
+      ]
+    },
+    "missing": {
+      "missing_cells": 19,
+      "rows_with_missing": 11,
+      "by_column": {
+        "species": 0,
+        "island": 0,
+        "bill_length_mm": 2,
+        "bill_depth_mm": 2,
+        "flipper_length_mm": 2,
+        "body_mass_g": 2,
+        "sex": 11,
+        "year": 0
+      }
+    },
+    "duplicates": {
+      "repeated_rows_after_first": 0
+    },
+    "numeric": {
+      "invalid_cells": 0,
+      "by_column": {
+        "bill_length_mm": 0,
+        "bill_depth_mm": 0,
+        "flipper_length_mm": 0,
+        "body_mass_g": 0
+      },
+      "policy": "Nonmissing measurement must be numeric, finite and positive; no biological upper bounds."
+    },
+    "categories": {
+      "unexpected_cells": 0,
+      "by_column": {
+        "species": 0,
+        "island": 0,
+        "sex": 0
+      }
+    }
+  },
+  "trace": [
+    {
+      "sequence": 1,
+      "action": "load",
+      "reason": "No dataset is loaded; use the registered read-only source.",
+      "outcome": "requested"
+    },
+    {
+      "sequence": 2,
+      "action": "load",
+      "reason": "Aggregate observation saved in this run's state.",
+      "outcome": "observed"
+    },
+    {
+      "sequence": 3,
+      "action": "profile",
+      "reason": "Loaded data require a schema observation before selecting checks.",
+      "outcome": "requested"
+    },
+    {
+      "sequence": 4,
+      "action": "profile",
+      "reason": "Aggregate observation saved in this run's state.",
+      "outcome": "observed"
+    },
+    {
+      "sequence": 5,
+      "action": "missing",
+      "reason": "Count missing values without deleting or filling them.",
+      "outcome": "requested"
+    },
+    {
+      "sequence": 6,
+      "action": "missing",
+      "reason": "Aggregate observation saved in this run's state.",
+      "outcome": "observed"
+    },
+    {
+      "sequence": 7,
+      "action": "duplicates",
+      "reason": "Check repeated attribute rows without assuming duplicate animals.",
+      "outcome": "requested"
+    },
+    {
+      "sequence": 8,
+      "action": "duplicates",
+      "reason": "Aggregate observation saved in this run's state.",
+      "outcome": "observed"
+    },
+    {
+      "sequence": 9,
+      "action": "numeric",
+      "reason": "Profile contains applicable measurement_columns; run the bounded check.",
+      "outcome": "requested"
+    },
+    {
+      "sequence": 10,
+      "action": "numeric",
+      "reason": "Aggregate observation saved in this run's state.",
+      "outcome": "observed"
+    },
+    {
+      "sequence": 11,
+      "action": "categories",
+      "reason": "Profile contains applicable category_columns; run the bounded check.",
+      "outcome": "requested"
+    },
+    {
+      "sequence": 12,
+      "action": "categories",
+      "reason": "Aggregate observation saved in this run's state.",
+      "outcome": "observed"
+    },
+    {
+      "sequence": 13,
+      "action": "finish",
+      "reason": "All applicable configured checks completed.",
+      "outcome": "completed"
+    }
+  ],
+  "data_modified": false,
+  "scope": "Configured checks only; not scientific validation or a quality certificate.",
+  "evaluation_context": "Original public CSV"
+}

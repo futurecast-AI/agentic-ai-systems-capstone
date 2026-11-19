@@ -1,0 +1,69 @@
+{
+  "status": "budget_exhausted",
+  "disposition": "incomplete_review",
+  "reason": "Next required tool would exceed the call budget.",
+  "findings": [],
+  "tool_calls": 2,
+  "completed_tools": [
+    "load",
+    "profile"
+  ],
+  "skipped_tools": [],
+  "observations": {
+    "load": {
+      "rows": 344,
+      "columns": 8,
+      "source": "pinned public CSV"
+    },
+    "profile": {
+      "missing_columns": [],
+      "extra_column_count": 0,
+      "measurement_columns": [
+        "bill_length_mm",
+        "bill_depth_mm",
+        "flipper_length_mm",
+        "body_mass_g"
+      ],
+      "category_columns": [
+        "species",
+        "island",
+        "sex"
+      ]
+    }
+  },
+  "trace": [
+    {
+      "sequence": 1,
+      "action": "load",
+      "reason": "No dataset is loaded; use the registered read-only source.",
+      "outcome": "requested"
+    },
+    {
+      "sequence": 2,
+      "action": "load",
+      "reason": "Aggregate observation saved in this run's state.",
+      "outcome": "observed"
+    },
+    {
+      "sequence": 3,
+      "action": "profile",
+      "reason": "Loaded data require a schema observation before selecting checks.",
+      "outcome": "requested"
+    },
+    {
+      "sequence": 4,
+      "action": "profile",
+      "reason": "Aggregate observation saved in this run's state.",
+      "outcome": "observed"
+    },
+    {
+      "sequence": 5,
+      "action": "finish",
+      "reason": "Next required tool would exceed the call budget.",
+      "outcome": "budget_exhausted"
+    }
+  ],
+  "data_modified": false,
+  "scope": "Configured checks only; not scientific validation or a quality certificate.",
+  "evaluation_context": "Allow only two tool calls"
+}

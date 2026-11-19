@@ -1,0 +1,33 @@
+{
+  "status": "failed",
+  "disposition": "incomplete_review",
+  "reason": "Tool failure; remaining checks were not performed.",
+  "findings": [],
+  "tool_calls": 1,
+  "completed_tools": [],
+  "skipped_tools": [],
+  "observations": {},
+  "trace": [
+    {
+      "sequence": 1,
+      "action": "load",
+      "reason": "No dataset is loaded; use the registered read-only source.",
+      "outcome": "requested"
+    },
+    {
+      "sequence": 2,
+      "action": "load",
+      "reason": "Tool failed; no retry or success inference.",
+      "outcome": "error"
+    },
+    {
+      "sequence": 3,
+      "action": "finish",
+      "reason": "Tool failure; remaining checks were not performed.",
+      "outcome": "failed"
+    }
+  ],
+  "data_modified": false,
+  "scope": "Configured checks only; not scientific validation or a quality certificate.",
+  "evaluation_context": "Fixture: zero rows"
+}
