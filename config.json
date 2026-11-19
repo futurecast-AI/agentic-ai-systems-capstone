@@ -1,0 +1,15 @@
+{
+  "dataset_id": "penguins",
+  "relative_path": "data/penguins.csv",
+  "max_bytes": 1000000,
+  "max_rows": 5000,
+  "max_columns": 20,
+  "max_tool_calls": 6,
+  "measurement_columns": ["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"],
+  "categories": {
+    "species": ["Adelie", "Chinstrap", "Gentoo"],
+    "island": ["Biscoe", "Dream", "Torgersen"],
+    "sex": ["male", "female"]
+  },
+  "required_columns": ["species", "island", "bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g", "sex", "year"]
+}
