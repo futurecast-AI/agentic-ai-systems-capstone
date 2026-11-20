@@ -17,37 +17,35 @@ def code(text):
 
 
 md("""
-# A bounded data-quality review agent
-**AI Foundations (Edward Hickman) · Udacity · Project 6 — Agentic AI Systems**
+# An LLM-directed, bounded data-quality review agent
+**AI Foundations (Edward Hickman) · Udacity · Project 6 resubmission**
 
-The persona is a cautious reviewer: inspect, explain and defer changes to a
-human. A **single deterministic rule-based agent** chooses tools from observed
-schema, stores limited per-run state and stops at explicit boundaries.
-It is **not an LLM**, has no natural-language planning, and makes no API calls.
-The rubric permits decision logic and does not require an LLM or paid service.
-The implementation uses ordinary Python function orchestration, not an unapproved
-third-party agent framework.
+This revision replaces the rejected rule-based controller with **MiniMax-M3,
+LangChain and LangGraph**. A language model interprets the user's instruction,
+chooses a tool, reads its observation and decides again. Python enforces
+capability limits; it does not supply the checking sequence.
 
-`DESIGN_PLAN.md` records the architecture and evaluation cases before implementation.
-`agentic_system.py` contains the full runnable implementation; the notebook
-displays it and executes it with the same source data and test scenarios.
-AI assistance was used; Edward must review, understand and personalize the
-work as required by his course's academic-integrity policy.
+The notebook displays the complete implementation, **makes a real live model
+run**, and inspects eight separately captured live scenarios. Scripted unit
+tests are distinguished from real provider evidence. Replit AI assisted with
+implementation, debugging, evaluation and writing. Edward must understand,
+review and personalize the work under the course's AI-use policy; independent
+authorship and reviewer acceptance are not claimed.
 """)
 md("""
-## 1. Task, data and boundaries
-Review a **registered Palmer Penguins CSV** for missing cells, repeated rows,
-invalid measurement values and unexpected categories. Public field data
-contain 344 penguins and eight columns, collected by Kristen Gorman and Palmer
-Station LTER and distributed by Horst et al. (2020). This is a new dataset and
-new workflow, not a reused capstone agent. The dataset is CC0; attribution
-and pinned source details are included.
+## 1. Task and data
 
-No data repairs, imputation, deletions, shell commands, network tools or external
-messages are available. Structured requests accept only dataset ID `penguins`
-and intent `review`; file paths and free-form instructions are not accepted.
-The agent is semi-autonomous within this small decision graph: it chooses
-applicable checks and terminal disposition, not open-ended goals.
+The persona is a cautious reviewer of one registered public Palmer Penguins CSV.
+It may inspect but cannot repair, delete, run shell commands or send messages.
+The source has 344 rows and eight columns; it is distributed by Horst et al.
+(2020), with field data from Kristen Gorman and Palmer Station LTER.
+`data/DATA_NOTICE.md` records CC0 attribution, source version and fingerprint.
+
+Structured request validation restricts dataset, intent and budget.
+**Natural-language instructions remain free-form within that scope**: missingness,
+duplicates, a full review, or a request the model must refuse.
+User instructions and aggregate tool observations go to the model provider.
+Raw dataset rows are not sent by the registered tools.
 """)
 code("""
 from pathlib import Path
@@ -55,189 +53,214 @@ import hashlib
 import inspect
 import json
 import platform
-import numpy as np
+from importlib.metadata import version
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
-from IPython.display import Code, display
+from IPython.display import Code, Image, display
 import agentic_system
-from agentic_system import Request, ReviewAgent, ReviewTools, SUMMARY, CONFIG
-from evaluate_agent import run_evaluation
+from agentic_system import CONFIG, PERSONA, Request, ReviewAgent, SUMMARY
 
 ROOT = Path.cwd()
 OUT = ROOT / "outputs"
-OUT.mkdir(exist_ok=True)
 source = ROOT / "data/penguins.csv"
-versions = {"python": platform.python_version(), "numpy": np.__version__,
-            "pandas": pd.__version__}
+versions = {"python": platform.python_version(),
+            **{p: version(p) for p in ["langgraph", "langchain-openai", "langchain-core", "pandas"]}}
 (OUT / "runtime_versions.json").write_text(json.dumps(versions, indent=2) + "\\n")
 display(versions)
-display(pd.read_csv(source).head())
-print("Data shape:", pd.read_csv(source).shape)
-print("SHA-256:", hashlib.sha256(source.read_bytes()).hexdigest())
+print("Shape:", pd.read_csv(source).shape)
+print("Source SHA-256:", hashlib.sha256(source.read_bytes()).hexdigest())
 display(CONFIG)
 """)
 md("""
-## 2. Architecture and design tradeoffs
-Figure 1 shows request validation, the decision loop, run-local memory, the
-read-only tools, their observations and terminal output. The loop is a modest
-sense/decide/act pattern; agent architectures and autonomy have a broader
-history than LLM tool use (Wooldridge & Jennings, 1995). One agent avoids
-unnecessary coordination and makes accountability easier for this bounded task.
+## 2. Architecture: fixed graph, model-selected actions
 
-Memory is a fresh `RunState` for every request: completed-tool names, skipped
-tools, observations, counter and event trace, plus the temporary working frame.
-The returned report contains aggregates and fixed policy reasons, not raw
-row values or a hidden reasoning transcript. There is no conversation history,
-cross-run learning, persistent memory or general-purpose planner.
+LangGraph supplies state, nodes and transitions (LangChain, n.d.). Its graph
+alternates `llm_decision` and `read_only_tool`. The graph is fixed, but the
+**identity, relevance and order of analysis tools are chosen by the LLM**.
+The loop is inspired by interleaved language-model action and observation
+(Yao et al., 2023), not a reproduction of the ReAct benchmark.
+
+Every run has fresh message history, aggregate observations, completed tools,
+counters, event trace and a local working frame. The LLM sees messages, not
+the frame. There is no persistent memory, multi-agent team or cross-run learning.
+Public tool justifications are not private chain-of-thought.
 """)
 code("""
-fig, ax = plt.subplots(figsize=(11, 7))
-ax.set(xlim=(0, 11), ylim=(0, 7))
-ax.axis("off")
-boxes = {
-    "request": (0.3, 5.5, 2.7, 1.0, "Structured request\\ndataset • intent • budget"),
-    "guard": (4.1, 5.5, 2.8, 1.0, "Request gate\\nallowlist + 1–6 tool calls"),
-    "memory": (0.3, 2.9, 2.7, 1.5, "Per-run memory\\nobservations + completed\\nskipped + counter + trace\\ntemporary working frame"),
-    "policy": (4.1, 3.0, 2.8, 1.3, "Rule-based decision loop\\nselect next applicable tool\\nor stop; never repeat"),
-    "tools": (8.0, 2.8, 2.7, 1.8, "Read-only tool dispatcher\\nload • profile • missing\\nduplicates • numeric\\ncategories"),
-    "result": (3.8, 0.4, 3.4, 1.3, "Aggregate review + event trace\\ncompleted / blocked / failed\\nor budget exhausted\\nhuman decides any changes"),
-}
-for key, (x, y, w, h, label) in boxes.items():
-    patch = FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.06",
-                           edgecolor="#154C75", facecolor="#8CCEDE" if key == "policy" else "#F5F5F5")
-    ax.add_patch(patch)
-    ax.text(x+w/2, y+h/2, label, ha="center", va="center", fontsize=10)
-
-def arrow(start, end, label="", label_position=None, curve=0):
-    ax.add_patch(FancyArrowPatch(start, end, arrowstyle="-|>", mutation_scale=14,
-                                connectionstyle=f"arc3,rad={curve}", color="#154C75"))
-    if label_position:
-        ax.text(*label_position, label, fontsize=9, ha="center", va="center",
-                bbox={"facecolor": "white", "edgecolor": "none", "pad": 1})
-
-arrow((3.05, 6.0), (4.02, 6.0))
-arrow((5.5, 5.4), (5.5, 4.4), "accepted", (6.1, 4.9))
-arrow((4.0, 3.9), (3.1, 3.9), "observe", (3.55, 4.12))
-arrow((3.1, 3.25), (4.0, 3.25), "read state", (3.55, 2.98))
-arrow((7.0, 3.95), (7.9, 3.95), "invoke", (7.45, 4.18))
-arrow((7.9, 3.2), (7.0, 3.2), "result/error", (7.45, 2.96))
-arrow((5.5, 2.9), (5.5, 1.8), "finish / failure / budget", (5.5, 2.3))
-arrow((6.95, 5.9), (7.3, 1.1), "blocked", (8.15, 5.3), curve=-0.35)
-ax.text(9.35, 1.8, "Pinned local CSV only\\nNo edit, network or shell tools",
-        ha="center", fontsize=9)
-fig.suptitle("Figure 1 — bounded reviewer architecture and actual control flow", fontsize=14)
-fig.tight_layout()
-fig.savefig(OUT / "architecture_diagram.png", dpi=180, bbox_inches="tight")
-plt.show()
+display(Image(filename=str(OUT / "architecture_diagram.png")))
+print(PERSONA)
 """)
 md("""
-## 3. Full implementation and decision policy
-The source below is the complete implementation supplied as `agentic_system.py`,
-not pseudocode. The notebook imports and runs this same module.
+## 3. Complete runnable implementation
 
-Policy order is load → profile → missingness → duplicates → applicable numeric
-and category checks → finish. Applicability is decided from observed columns.
-Completed-tool state prevents repeats; skips are explicit events. Failure stops
-the run, and incomplete checks can never produce `configured_checks_clear`.
-Missingness uses `isna()`, rather than equality with NaN (pandas development team,
-n.d.). Positive finite numeric rules are deliberately narrow, not biological
-plausibility checks.
+The following is the actual imported source, not pseudocode or an unused model
+client. `create_model` uses the key from the environment; the value is never
+displayed. MiniMax's OpenAI-compatible endpoint is used through LangChain
+(MiniMax, n.d.). Six read-only function schemas are bound to the model.
 """)
 code("""
 display(Code(inspect.getsource(agentic_system), language="python"))
 """)
 md("""
-## 4. Original-data execution and observable decisions
-Each trace entry reports a policy action, short reason and observed/requested
-outcome. This is an inspectable rule trace, **not an LLM's private reasoning**.
-The data remain unchanged. A human-review recommendation never grants the agent
-permission to repair a file.
+## 4. Execute a genuine LLM reasoning/action/observation loop
+
+This cell makes paid/provider-metered requests and requires `MINIMAX_API_KEY`
+in the execution environment. No fake or deterministic fallback is available.
+The model chooses the analysis actions for this narrow request. Running the
+notebook again may produce different wording or tool paths.
 """)
 code("""
-before = hashlib.sha256(source.read_bytes()).hexdigest()
-original = ReviewAgent().run(Request())
-print("Status:", original["status"])
-print("Disposition:", original["disposition"])
-print("Findings:", original["findings"])
-display(original["observations"])
-display(pd.DataFrame(original["trace"]))
-assert before == hashlib.sha256(source.read_bytes()).hexdigest()
+live_demo = ReviewAgent().run(Request(
+    instructions="Report only missing-data counts for this CSV. Do not run unrelated checks."))
+assert any(m["role"] == "ai" for m in live_demo["messages"]), "No real model response."
+assert live_demo["status"] == "completed", "Inspect the unsuccessful live run."
+assert "missing" in live_demo["observations"], "Missingness evidence was not obtained."
+(OUT / "notebook_live_demo.json").write_text(json.dumps(live_demo, indent=2) + "\\n")
+display({k: live_demo[k] for k in [
+    "provider", "model", "status", "disposition", "model_turns", "tool_calls", "completed_tools"]})
+display(pd.DataFrame(live_demo["trace"]))
+print(live_demo["answer"])
 """)
 md("""
-## 5. Representative scenarios and deliberate failures
-The twelve cases were specified in the design plan. Only `original` is
-unmodified field data. The harness explicitly constructs complete-case,
-duplicate, negative-mass, categories-only, empty, instruction-text and absurd-mass
-fixtures from copies; these are **test alterations**, not discovered field
-observations. It also submits blocked requests, restricts a call budget and
-injects a numeric-tool failure. No fixture preparation is an agent action.
+### See the observations return before subsequent decisions
+
+The transcript alternates LLM-selected actions and actual tool results.
+The `reason` arguments are short public justifications. They are observable
+outputs, not proof of the model's hidden internal reasoning.
 """)
 code("""
-results, evaluation = run_evaluation(OUT / "runs")
-display(evaluation)
-for name in ["categories_only", "low_budget", "tool_failure", "instruction_text"]:
-    result = results[name]
-    print("\\nSCENARIO:", name, "—", result["status"], "/", result["disposition"])
-    display(pd.DataFrame(result["trace"]))
-    display(result["observations"])
+for message in live_demo["messages"]:
+    if message["role"] in ["system", "human"]:
+        continue
+    print("\\nROLE:", message["role"])
+    if message.get("tool_calls"):
+        print("MODEL-SELECTED:", message["tool_calls"])
+    else:
+        print(message["content"])
 """)
 md("""
-## 6. Evaluation, limitations and responsible use
-The original 344-row CSV yields 19 missing cells across 11 records: two in
-each of four measurements and eleven in `sex`. Six tool calls complete and
-the result is `human_review`; no repeated rows or configured numeric/category
-violations are found. Missing cells and affected records are different counts.
+## 5. Eight captured live scenarios
 
-The categories-only fixture skips numeric validation based on profile state.
-It also shows why repeated attribute rows need interpretation: dropping
-measurement columns makes many animals share the same remaining attributes;
-this does **not** establish duplicate penguins. The low-budget case stops after
-load and profile with `incomplete_review`, not a success claim. Injected numeric
-failure stops before category checking; this is a simulated outage, not a
-failure of pandas in the original-data run.
+`evaluate_agent.py` made real provider calls for each case below. This cell
+**reads saved evidence**, rather than pretending to execute all eight again.
+The manifest fingerprints the evaluated implementation and configuration.
+These are designed development cases, not a blinded or statistically
+representative reliability benchmark. Fixtures are deliberately altered copies.
+""")
+code("""
+evaluation = pd.read_csv(OUT / "llm_runs/evaluation_summary.csv").fillna("")
+display(evaluation[["scenario", "status", "disposition", "model_turns", "tool_calls"]])
+manifest = json.loads((OUT / "llm_runs/run_manifest.json").read_text())
+assert manifest["implementation_sha256"] == hashlib.sha256((ROOT / "agentic_system.py").read_bytes()).hexdigest()
+assert manifest["evaluator_sha256"] == hashlib.sha256((ROOT / "evaluate_agent.py").read_bytes()).hexdigest()
+assert manifest["config"] == CONFIG
+display(manifest)
+runs = {name: json.loads((OUT / "llm_runs" / f"{name}.json").read_text())
+        for name in evaluation.scenario}
+assert all(r["provider"] == "minimax" and r["evidence_type"] == "live_provider_response"
+           for r in runs.values())
+display(pd.DataFrame([{"request": name, "path": " -> ".join(r["completed_tools"]),
+                      "status": r["status"], "coverage": r["full_configured_coverage"]}
+                     for name, r in runs.items()]))
+""")
+md("""
+## 6. Failure, budget and write-request boundaries
 
-The instruction-like species text is never executed or sent to an LLM; it is
-counted as an unexpected category. This verifies a narrow data/control separation,
-not general prompt-injection resistance. Most importantly, the complete-case
-fixture with **999,999 g body mass is not flagged** by positivity-only rules.
-The reported `configured_checks_clear` is correct for those rules but would be
-misleading if treated as a scientific quality certificate. This known miss is
-retained, not relabeled as a robustness success.
+The low-budget case may stop before a third tool. The injected numeric failure
+returns an error observation to the LLM so it can explain the missing evidence.
+There is no repair or deletion tool, even when natural language asks for one.
+Completion, full configured coverage and scientific validity are different.
+""")
+code("""
+for name in ["low_budget", "tool_failure", "delete_request"]:
+    r = runs[name]
+    print("\\nSCENARIO:", name)
+    display({k: r[k] for k in ["status", "disposition", "tool_calls", "model_turns", "data_modified"]})
+    display(pd.DataFrame(r["trace"]))
+    print("MODEL ANSWER:", r["answer"] or "(No final model answer; the guard stopped the run.)")
+""")
+md("""
+## 7. Known miss and fallible explanations
 
-All twelve predeclared policy expectations are observed, including that known
-miss; this is not 100% anomaly detection, real-world accuracy or comprehensive
-safety assurance. Read-only tools, a six-call ceiling, no automatic repairs and
-explicit terminal statuses support limited control and accountability, consistent
-with risk-management principles rather than certification (NIST, 2023).
-The human should investigate missingness rather than silently delete records,
-which could alter species, island or sex representation. The notebook uses
-public animal data, but aggregate-only logging alone would not establish privacy
-for a future sensitive dataset. No OS sandbox, adversarial resource test,
-wall-clock timeout or automatic recovery from arbitrary programming bugs is claimed.
+The `absurd_positive_mass` fixture has 333 complete rows and a manually inserted
+999,999 g value. The numeric tool reports only finite/positive validity counts;
+it does not return the actual mass. **The model cannot see that hidden outlier
+through those observations.** A clear configured check is not a scientific
+certificate.
+
+Early real runs are retained under `outputs/development_attempts`. One batch
+request was stopped; the guard now rejects the batch and lets the model choose
+one action. Another development run overinterpreted projected attribute repeats
+and marginal missing counts. Instructions were strengthened, not the saved
+answers edited. The final explanation audit records remaining limitations.
+""")
+code("""
+known = runs["absurd_positive_mass"]
+display(known["observations"])
+print("Disposition:", known["disposition"])
+print(known["answer"])
+print("\\nEXPLANATION AUDIT")
+display(json.loads((OUT / "explanation_audit.json").read_text()))
+""")
+md("""
+## 8. Safety, reproducibility and responsible use
+
+Allowlisted tools, schema validation, source fingerprint, size bounds, six tool
+executions, twelve model turns, a client timeout setting and zero automatic
+provider retries constrain this small system. Invalid tools or dependencies stop;
+a rejected batch returns feedback without running any requested tool.
+These are risk controls, not NIST certification (NIST, 2023).
+
+There is no OS isolation, end-to-end time/cost guarantee, persistent memory,
+general prompt-injection defense, scientific range validation or fairness study.
+User text reaches a third party. Aggregate outputs alone do not guarantee privacy.
+The harness writes evaluation artifacts; registered agent tools cannot write data.
+
+`outputs/validation.txt` records offline unit tests with a scripted model.
+They check software assertions and do **not** establish live LLM planning,
+scientific accuracy or a general success rate. Seeds/fingerprints/package freezes
+do not remove provider nondeterminism.
+""")
+code("""
+print((OUT / "validation.txt").read_text())
+display(json.loads((OUT / "llm_runs/source_integrity.json").read_text()))
+assert hashlib.sha256(source.read_bytes()).hexdigest() == agentic_system.SOURCE_SHA256
+assert all(not r["data_modified"] for r in runs.values())
+print("Source fingerprint unchanged; all recorded agent runs report no data modification.")
 """)
 md("""
 ## References
-Horst, A. M., Hill, A. P., & Gorman, K. B. (2020).
-*palmerpenguins: Palmer Archipelago (Antarctica) penguin data* [Data set].
-https://doi.org/10.5281/zenodo.3960218
 
-National Institute of Standards and Technology. (2023).
-*Artificial intelligence risk management framework (AI RMF 1.0)*
-(NIST AI 100-1). https://doi.org/10.6028/NIST.AI.100-1
+Horst, A. M., Hill, A. P., & Gorman, K. B. (2020). *palmerpenguins: Palmer Archipelago
+(Antarctica) penguin data* [Data set]. https://doi.org/10.5281/zenodo.3960218
 
-pandas development team. (n.d.). *Working with missing data*.
-https://pandas.pydata.org/docs/user_guide/missing_data.html
+LangChain. (n.d.). *Workflows and agents*.
+https://docs.langchain.com/oss/python/langgraph/workflows-agents
 
-Wooldridge, M., & Jennings, N. R. (1995). Intelligent agents: Theory and practice.
-*The Knowledge Engineering Review, 10*(2), 115–152.
-https://doi.org/10.1017/S0269888900008122
+MiniMax. (n.d.). *OpenAI API compatibility*.
+https://platform.minimax.io/docs/api-reference/text-openai-api
+
+National Institute of Standards and Technology. (2023). *Artificial intelligence
+risk management framework (AI RMF 1.0)*. https://doi.org/10.6028/NIST.AI.100-1
+
+Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., & Cao, Y. (2023).
+ReAct: Synergizing reasoning and acting in language models. *International
+Conference on Learning Representations*. https://openreview.net/forum?id=WE_vluYUL-X
 """)
 from sys import path
 path.insert(0, str(ROOT))
-from agentic_system import SUMMARY
+md("""
+## Notebook summary
 
-md("## Notebook summary\n\n" + SUMMARY)
+This single LLM-directed reviewer uses LangGraph to alternate model decisions
+with six read-only tool capabilities and fresh message memory.
+In the full live review, it made six tool executions and found 19 missing cells
+across 11 records; narrower requests produced shorter model-selected paths.
+The budget case stopped incomplete, an injected error returned to the model for
+explanation, and the unsupported deletion request used no tools.
+The positive 999,999 g fixture still passed the limited numeric rule, while
+the explanation audit retained arithmetic and coverage errors in model prose.
+The evidence demonstrates a bounded action/observation loop, not hallucination-free
+reasoning, scientific validity, independent authorship or deployment readiness.
+""")
 notebook = nbf.v4.new_notebook(cells=cells)
 notebook.metadata.kernelspec = {"display_name": "Python 3", "language": "python", "name": "python3"}
 notebook.metadata.language_info = {"name": "python", "version": "3.11.18"}

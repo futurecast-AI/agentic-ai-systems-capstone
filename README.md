@@ -1,118 +1,120 @@
-# LLM-powered agentic workflows capstone — revision
+# LLM-directed agentic workflows capstone — resubmission
 
 **AI Foundations (Edward Hickman) · Udacity · Project 6**
 
-> **Not ready to resubmit yet.** The LLM architecture has been implemented and
-> offline-tested. The latest MiniMax key returns HTTP 402
-> (`insufficient_balance_error`); its quota endpoint succeeds but reports zero
-> allocated text usage. An intermediate key returned 401; that is no longer the
-> latest result. OpenAI previously returned `insufficient_quota` (429).
-> Usable API credit/quota is needed. No successful live response is claimed. The current
-> `module_summary.*`, notebook and `outputs/runs/` still describe the rejected
-> rule-based version and must be rebuilt, not uploaded as the revision.
+The rejected deterministic controller has been replaced with **MiniMax-M3,
+LangChain and LangGraph**. Eight real provider-backed scenarios, a separately
+executed notebook demo, a revised APA report and source are included.
+This is prepared for Edward's review and resubmission—not a classroom pass,
+independent-authorship claim or production deployment.
 
-## What changed
+## Start here
 
-The original implementation incorrectly treated a predefined Python checklist as
-sufficient. The reviewer requires actual LLM-directed planning. The new
-`agentic_system.py` uses **LangGraph** and LangChain **ChatOpenAI**:
+- `module_summary.pdf`: revised nine-page report, including architecture,
+  actual behavior, plain-language explanation, limitations and references.
+- `agentic_system.ipynb`: executed notebook with full source, a genuine live
+  demo, saved-case inspection and a five-sentence conclusion.
+- `agentic_system.py`: runnable LLM agent; `evaluate_agent.py`: actual live suite.
+- `outputs/llm_runs/`: current unedited model/tool transcripts and provenance.
+- `outputs/explanation_audit.json`: retained errors and scope limits.
+- `REVIEWER_RESPONSE.md`: maps each requested improvement to code and evidence.
 
-`user instructions → LLM decision → guarded read-only tool → observation → LLM decision`
+Opening the report, HTML notebook or saved traces does not need an API key.
+**Rerunning live calls needs an active, funded text-API account.**
 
-The LLM chooses which tool to call and when to answer. The controller does not
-contain a predefined sequence or a keyword-to-tool planner. A missingness-only
-request and a duplicate-only request can require different plans. Application
-guards enforce dependencies, capabilities and budgets; they do not pick the
-next analytical check.
+## What is genuinely agentic?
 
-## Identifiable agent components
+`user instructions → LLM action → guarded tool → ToolMessage → LLM next action/final answer`
 
-- **Persona:** cautious data-quality reviewer, defined in `PERSONA`.
-- **Reasoning/decisions:** model-selected function calls with brief public action
-  justifications; observations are returned before the next decision.
-- **Tools:** load, profile, missingness, duplicates, numeric validity, categories.
-- **Memory:** fresh LangGraph message history, observations, working frame, trace,
-  completed tools and counters per run. No persistent cross-run memory.
-- **Boundaries:** read-only registered public data, six tool calls, eight model
-  turns, no arbitrary paths, writes or shell tools. Calls have a provider timeout;
-  this is not a universal end-to-end or process-isolation guarantee.
+The fixed LangGraph topology does not prescribe the checking sequence.
+The model, not a keyword planner or Python checklist, selects tool identities,
+order and when to answer. Six deterministic tools perform the requested
+computations; deterministic tools are not the same as a deterministic planner.
 
-Public action summaries are not private chain-of-thought. The MiniMax M3 client
-disables its optional thinking output; the LLM still selects actions from
-instructions and observations. Do not claim biological validity from the narrow
-numeric rules or trust generated explanations without checking observations.
+| Component | Implementation |
+|---|---|
+| Persona | Cautious reviewer in `PERSONA` |
+| Reasoning/decisions | Real model-selected calls and public action justifications |
+| Tools | load, profile, missing, duplicates, numeric, categories |
+| Memory/state | Fresh message history, observations, completed tools, counters, trace and local frame |
+| Feedback | Actual observations and rejected-batch/error messages return to the LLM |
+| Authority | Read-only registered CSV; no editing, shell or arbitrary-path tools |
 
-## Setup and credentials
+Public justifications are not hidden chain-of-thought. Optional MiniMax thinking
+output is disabled; this does not replace the model's observable tool decisions.
+There is no persistent memory or cross-run learning.
 
-Tested locally with Python 3.11.18. The dependency freeze includes the actual
-installed LangGraph/LangChain/OpenAI packages and scientific/notebook libraries.
+## Actual observed behavior
+
+The full review used six tool executions and seven model turns, finding
+**19 missing cells across 11 records** in the 344×8 source.
+Missingness-only selected `load → missing`; duplicates-only selected
+`load → duplicates`. The two-call budget stopped incomplete, an injected
+numeric fault was explained after an error observation, and the unsupported
+deletion request was refused with **zero tool executions**.
+
+Do not equate completion with correctness:
+
+- A 999,999 g fixture still passes the finite/positive numeric rule.
+- The model sometimes overstates its evidence. The final original-data answer
+  contains a ratio error and contradicts its own missingness table in its closing
+  recommendation. The audit preserves these errors; answers were not edited.
+- The reduced-schema case made an unnecessary numeric call with no measurement
+  columns. Its empty result is not measurement validation.
+- Eight designed development cases and 52 passing offline tests are not a
+  general success rate, hallucination-free guarantee or scientific validation.
+
+An early live request batched two tools despite the provider setting. The guard
+now executes neither and returns rejection observations so the LLM can choose
+one itself. Repeated rejections are bounded by twelve model turns.
+Six tool executions remain the maximum. Client timeout settings and zero
+automatic provider retries are not an end-to-end runtime/cost guarantee.
+
+## Setup and run
+
+Tested with Python 3.11.18. `requirements.txt` is the actual environment freeze.
 
 ```bash
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
+python -m pytest tests -q
 ```
 
-Supply `MINIMAX_API_KEY` through your environment or secure Secrets manager.
-The default is **MiniMax-M3** at `https://api.minimax.io/v1`.
-Provider configuration is in `config.json`.
-
-To use funded OpenAI instead, supply `OPENAI_API_KEY` and set
-`AGENT_LLM_PROVIDER=openai`; its configured model is `gpt-4.1-mini`.
-The two keys are never substituted for one another or sent to each other's
-endpoint. Provider switching is explicit, not a hidden fallback.
-
-No key belongs in code, notebooks, logs, `.env` commits or the submission.
-API usage may cost money. A key's existence does not establish quota.
-
-## Run the implementation
-
-After usable provider credit is available:
+Supply `MINIMAX_API_KEY` through environment configuration or a secure Secrets
+manager; never put its value in source, notebooks, logs or the submission.
+The default model is `MiniMax-M3`, endpoint `https://api.minimax.io/v1`.
 
 ```bash
 python agentic_system.py
 python evaluate_agent.py
 ```
 
-The evaluation runner uses actual provider calls and saves observations,
-selected actions, final answers and usage metadata in `outputs/llm_runs/`.
-It never silently replaces a failed request with scripted responses.
-The existing files in that directory are **failed OpenAI attempts**, not
-successful planning evidence. The separate `outputs/live_access_check.json`
-records the sanitized provider blockers.
+For explicitly selected OpenAI access, set `AGENT_LLM_PROVIDER=openai` and supply
+`OPENAI_API_KEY`; configured model: `gpt-4.1-mini`. That alternative is
+unit-tested, but successful live evidence in this revision is MiniMax-only.
+No automatic provider/key substitution or fake fallback exists.
 
-## Offline verification
-
-```bash
-python -m pytest tests -q
+```python
+from agentic_system import Request, ReviewAgent
+result = ReviewAgent().run(Request(instructions="Report only missing data."))
 ```
 
-Tests use explicitly scripted model responses to check the real LangGraph loop,
-observation feedback, alternative action orders, validation, dependency/budget
-guards, refusal, error handling, state isolation and unchanged data.
-**These are software unit tests, not live-model evaluation.**
+Live requests may incur charges. User instructions and aggregate observations
+reach the provider; local dataset frames are not sent by these tools.
 
-## Remaining work before upload
+## Reproduce or inspect
 
-Run and inspect real LLM cases, including distinct natural-language tasks and
-an observed limitation/failure. Then replace the old notebook, report, scenario
-outputs and documentation with evidence from those runs; regenerate and verify
-the submission ZIP. See `SUBMISSION_CHECKLIST.md` and `RESUBMISSION_STATUS.md`.
+See `REPRODUCIBILITY.md` and `VERIFICATION.md`. Offline tests use an explicitly
+scripted model and require no credential. The executed notebook makes one
+new narrow live run, then clearly reads the saved eight-case suite.
+Reruns may vary; no byte-identical model-answer promise is made.
 
-AI assistance was used for design, implementation, tests and drafting.
-Edward must understand and personalize the work according to course policy.
-Nothing here automatically submits coursework, merges the PR or establishes
-reviewer acceptance.
+`outputs/development_attempts/` retains earlier LLM behaviors for transparency,
+not as the final evaluation. Superseded rule-only outputs have been removed.
+`outputs/live_access_check.json` distinguishes earlier access errors from the
+subsequent successful connection.
 
-## Five-sentence implementation summary
-
-This single LLM-powered reviewer uses LangGraph to alternate model decisions
-with read-only dataset tools and run-local message memory.
-The model interprets natural-language requests and chooses its next tool or
-final response after receiving observations.
-Application guards enforce allowlists, dependencies and budgets without
-supplying a fixed sequence of checks.
-Offline tests exercise control and safety using scripted responses, but live
-provider evaluation is currently blocked by insufficient credit.
-The implementation cannot certify scientific data validity or replace human
-judgment, and it is not yet a completed resubmission.
+Replit AI assisted with planning, implementation, debugging, testing and writing.
+Edward must review, understand and personalize the work according to course
+policy. Nothing here uploads coursework or merges the draft PR.

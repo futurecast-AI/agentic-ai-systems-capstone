@@ -1,57 +1,78 @@
-# Verification record — LLM revision, live execution blocked
+# Verification of the LLM-directed resubmission
 
-## Offline checks
+## Real model behavior
 
-The revised suite exercises the actual LangGraph loop using explicitly
-scripted model responses. It tests alternative selected tool sequences and
-narrow requests, returned observations, fresh memory, source/fixture
-immutability, allowed tools/arguments, dependency guards, model/tool budgets,
-error observations, no silent retries, scoped completion and provider/key
-separation. See `outputs/validation.txt` for the current executed test count.
+`outputs/llm_runs/` contains eight current MiniMax-M3 scenario records and
+35 actual provider-response turns. There is no fake fallback.
+`run_manifest.json` fingerprints the implementation, evaluator and configuration.
+The current source hashes match that manifest.
 
-These unit tests establish specified software behavior, not an LLM's actual
-planning quality. The original source remains fingerprinted at
-`f204db2c753b0937caac3cb35258562c14f073e4bbc76be24b4c51ce22767a93`.
+| Case | Actual result | Tool executions |
+|---|---|---:|
+| Original CSV | completed / human_review | 6 |
+| Missingness only | completed / partial_review | 2 |
+| Duplicates only | completed / partial_review | 2 |
+| Three-column fixture | completed / human_review | 6 |
+| Budget of two | budget_exhausted / incomplete_review | 2 |
+| Injected numeric fault | failed / incomplete_review | 3 |
+| Delete/overwrite request | completed / partial_review; refusal | 0 |
+| 999,999 g fixture | completed / configured_checks_clear; known miss | 6 |
 
-## Provider checks
+The full run used seven model turns. Missingness/duplicates requests selected
+different short paths; the injected fault returned an error observation before
+the model's final explanation. The model—not a Python keyword planner—selected
+these actions. Full configured coverage is computed independently.
 
-OpenAI: configured key was passed only to `api.openai.com`. The live runner's
-eight attempts returned no AI message. A bounded diagnostic established HTTP 429,
-type `insufficient_quota`, code `credit_balance_exhausted`.
+**Completed does not mean correct.** The final explanation audit retains a
+ratio error, a recommendation inconsistent with the missingness table and a
+self-corrected schema-count mistake. The three-column fixture also elicited an
+unnecessary numeric check with an empty result. The model cannot detect the
+hidden 999,999 g value through aggregate positivity-only tools.
 
-MiniMax: configured key was passed to the documented MiniMax endpoint.
-The bounded text probe returned HTTP 402, type `insufficient_balance_error`.
-The documented quota endpoint returned success but zero allocated text usage.
-No key values, partial values or request authorization headers are saved.
+## Offline and clean-environment checks
 
-No successful live response or completed model-driven case is claimed.
-Do not reuse failed requests as success evidence. Automatic repeated requests
-will not repair these credit limitations.
+- **52 tests passed** in the working Python 3.11.18 environment.
+- The actual `pip freeze` installed into a new Python 3.11.18 environment;
+  `pip check` reported no broken requirements and **52 tests passed** there.
+- The final notebook was also executed using that clean environment's explicit
+  kernel. Its live missingness demo made two tool executions and three model
+  turns; all nine code cells executed without error outputs.
+- Unit responses are scripted by design, not live LLM evidence.
+- Source compilation and whitespace checks are separate from behavioral tests.
 
-### Replacement MiniMax key
+An initial clean-setup command selected the sandbox's unrelated Python 3.14,
+whose NumPy could not load its C++ runtime. That setup was not the documented
+target; the explicit Python 3.11 environment installed and passed. Use the
+specified interpreter, not an arbitrary `python3` alias.
 
-A later key replacement changed the error: both documented global
-(`api.minimax.io`) and mainland-China (`api.minimax.cn`) text endpoints returned
-HTTP 401, type `authorized_error`. The global quota endpoint returned base
-status 1004, not quota allocation data. Checks found no extra whitespace,
-newlines or Bearer prefix in the configured value; no value was printed.
+## Report and browser inspection
 
-That intermediate key had an authentication blocker, not an established
-credit shortage.
+The revised PDF has nine pages. The DOCX opens and converts successfully.
+The course template's styles, section geometry and header/footer bytes were
+preserved; `outputs/report_template_audit.json` records the checks.
+The report's pages and architecture figure were rendered/visually inspected,
+with text bounds checked for clipping. Instructor/due-date fields were not
+invented.
 
-### Latest replacement
+The exported executed-notebook HTML was checked in a desktop browser. The
+current eight-case table was fully visible without clipped columns, including
+the two intended incomplete cases and zero-tool refusal. This browser check
+read saved results; it did not execute the agent.
 
-The next MiniMax key returned HTTP 402, `insufficient_balance_error`.
-The quota endpoint succeeded with base status 0 and reported zero allocated
-general/text quota for both usage windows. This differs from the intermediate
-key's 401 result. Usable API resources are needed; further blind key changes
-or automatic repeated requests are not the next step.
+The served PDF is checked against the local PDF by fingerprint. Temporary
+preview availability is not a substitute for the included offline files.
 
-## Pending verification and deliverables
+## Integrity and scope
 
-Successful real-provider execution, updated notebook and APA report, revised
-diagram, final clean-environment replay and new submission ZIP are pending.
-Legacy reports, notebook outputs and `outputs/runs` belong to the rejected
-rule-based architecture. They are not evidence for the new agent.
+The original CSV fingerprint remained unchanged. Test fixtures are declared
+trusted copies; no source edit is authorized. Current provider keys are scanned
+for accidental inclusion before publication/packaging; none belongs in the ZIP.
+No `.env`, environment directory or Git metadata is intended for the archive.
 
-No classroom submission, reviewer pass, PR merge or CI pass is claimed.
+Earlier access failures and development traces are historical evidence only.
+Superseded rule-only scenario files were removed from the current submission;
+the source history remains available.
+
+Local verification is not a CI pass, independent model-quality assessment,
+security certification, classroom submission or passing reviewer decision.
+The PR remains draft pending Edward's review; no merge is authorized.

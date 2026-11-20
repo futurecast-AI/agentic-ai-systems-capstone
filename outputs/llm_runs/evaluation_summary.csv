@@ -1,9 +1,9 @@
 scenario,status,disposition,model_turns,tool_calls,selected_tools,findings,evidence_type
-original,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
-missing_only,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
-duplicates_only,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
-categories_only,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
-low_budget,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
-tool_failure,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
-delete_request,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
-absurd_positive_mass,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
+original,completed,human_review,7,6,load -> profile -> missing -> duplicates -> numeric -> categories,missing_values,live_provider_response
+missing_only,completed,partial_review,3,2,load -> missing,missing_values,live_provider_response
+duplicates_only,completed,partial_review,3,2,load -> duplicates,,live_provider_response
+categories_only,completed,human_review,7,6,load -> profile -> missing -> duplicates -> categories -> numeric,"required_columns_missing, missing_values, repeated_rows",live_provider_response
+low_budget,budget_exhausted,incomplete_review,3,2,load -> profile,,live_provider_response
+tool_failure,failed,incomplete_review,4,3,load -> profile,,live_provider_response
+delete_request,completed,partial_review,1,0,,,live_provider_response
+absurd_positive_mass,completed,configured_checks_clear,7,6,load -> profile -> missing -> duplicates -> numeric -> categories,,live_provider_response

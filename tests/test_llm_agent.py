@@ -97,9 +97,27 @@ def test_tool_argument_boundary(args):
     assert result["tool_calls"] == 0
 
 
-def test_parallel_calls_blocked():
+def test_parallel_calls_rejected_and_model_chooses_single_next_action():
     response = AIMessage(content="", tool_calls=[
         {"name": name, "args": {"reason": "test"}, "id": name} for name in ["load", "profile"]])
+    result, model = run([response, "load", "missing", "finish"])
+    assert result["completed_tools"] == ["load", "missing"]
+    assert result["model_turns"] == 4 and result["tool_calls"] == 2
+    assert all(json.loads(m.content)["tools_executed"] == 0 for m in model.contexts[1][-2:])
+    assert any(e["action"] == "tool_batch" and e["outcome"] == "rejected" for e in result["trace"])
+
+
+def test_repeated_batch_rejections_are_model_budget_bounded():
+    responses = [AIMessage(content="", tool_calls=[
+        {"name": name, "args": {"reason": "test"}, "id": f"{turn}_{name}"}
+        for name in ["load", "profile"]]) for turn in range(CONFIG["max_model_turns"])]
+    result, _ = run(responses)
+    assert result["status"] == "model_budget_exhausted" and result["tool_calls"] == 0
+
+
+def test_unknown_tool_in_batch_is_terminally_blocked():
+    response = AIMessage(content="", tool_calls=[
+        {"name": name, "args": {"reason": "test"}, "id": name} for name in ["load", "shell"]])
     result, _ = run([response])
     assert result["status"] == "blocked_tool_call" and result["tool_calls"] == 0
 

@@ -33,6 +33,11 @@ Tool failure becomes an observation the LLM can explain; no further tools run
 after failure. Invalid names/arguments, repeated calls or excess budgets stop
 without substituting a scripted fallback.
 
+A real development run requested multiple tools despite the provider setting.
+The revised guard executes none, returns rejection ToolMessages for the requested
+calls and lets the LLM choose one itself. No replacement action is scheduled by
+Python. Repeated rejections remain bounded by the model-turn ceiling.
+
 ## Memory and transparency
 
 Each run gets fresh LangGraph message state, observations, completed tools,
@@ -43,7 +48,7 @@ Only aggregate results go to the provider; raw dataset cell strings do not.
 
 ## Safeguards and residual risks
 
-Allowlisted dataset/tools, parameter validation, six tool calls, eight model
+Allowlisted dataset/tools, parameter validation, six tool calls, twelve model
 turns, sixty-second per-request provider timeout, zero automatic provider retries, source hash,
 size bounds and no edit/shell tools constrain execution. Partial evidence cannot
 be labeled a full configured review by the result wrapper, even if the model
@@ -55,11 +60,14 @@ relevant. There is no OS isolation, end-to-end runtime guarantee, certified
 security or scientific validity. Positivity-only numeric rules can still miss
 an absurd positive mass; adding an LLM does not make unavailable evidence visible.
 
-## Verification and pending evidence
+## Verification and observed limitations
 
 Offline tests use explicitly scripted model responses to test control and safety.
 They are not evidence of an LLM planning successfully. The live evaluation script
 uses only real provider responses and saves different natural-language requests,
 model-selected tool paths, observations and final answers to `outputs/llm_runs`.
-The report, notebook and resubmission ZIP must be rebuilt from those real runs.
-Do not present the old rule-based outputs as evidence of the new architecture.
+The revised report and executed notebook use eight current real-provider cases.
+Early development traces are separately retained. Final model prose still has
+arithmetic and coverage errors, documented in `outputs/explanation_audit.json`.
+Prompt changes did not establish reliable explanations or a held-out success rate.
+Superseded rule-only results are not current evidence.

@@ -1,6 +1,8 @@
 """Live evaluation using the configured provider secret; never substitutes fake responses."""
 import hashlib
 import json
+from datetime import datetime, timezone
+import platform
 from pathlib import Path
 
 import pandas as pd
@@ -11,6 +13,15 @@ from agentic_system import CONFIG, ROOT, Request, ReviewAgent, ReviewTools
 def run_evaluation(output_dir):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    manifest = {
+        "started_at_utc": datetime.now(timezone.utc).isoformat(),
+        "python": platform.python_version(),
+        "implementation_sha256": hashlib.sha256((ROOT / "agentic_system.py").read_bytes()).hexdigest(),
+        "evaluator_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "config": CONFIG,
+        "evaluation_scope": "Eight designed development cases; not an independent reliability benchmark.",
+    }
+    (output_dir / "run_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     source = ROOT / CONFIG["relative_path"]
     before = hashlib.sha256(source.read_bytes()).hexdigest()
     base = pd.read_csv(source)
@@ -58,6 +69,10 @@ def run_evaluation(output_dir):
         "unchanged": True, "scenario_count": len(rows),
         "note": "Live behavior may vary; no exact-output or universal-success claim."
     }, indent=2) + "\n")
+    manifest.update(completed_at_utc=datetime.now(timezone.utc).isoformat(),
+                    scenario_records_written=len(rows),
+                    provider_response_turns=sum(sum(m["role"] == "ai" for m in r["messages"]) for r in results.values()))
+    (output_dir / "run_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     return results, summary
 
 

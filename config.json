@@ -5,7 +5,7 @@
   "max_rows": 5000,
   "max_columns": 20,
   "max_tool_calls": 6,
-  "max_model_turns": 8,
+  "max_model_turns": 12,
   "provider": "minimax",
   "model": "MiniMax-M3",
   "openai_model": "gpt-4.1-mini",

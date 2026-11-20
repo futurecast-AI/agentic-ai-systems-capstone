@@ -1,29 +1,35 @@
-# Revised submission checklist — not ready for upload
+# Project 6 resubmission checklist
 
-## Implemented
+## Reviewer remediation
 
-- [x] Real LLM client integrated with LangGraph; not an unused API wrapper.
-- [x] Natural-language instructions enter the model context.
-- [x] Model-selected tools; no predefined analytical checking sequence.
-- [x] Tool observations return to the LLM before its next action.
-- [x] Persona, message memory, working state and action trace are identifiable.
-- [x] Read-only capabilities, validation, dependency and budget guards.
-- [x] Separate MiniMax/OpenAI configuration and secret names.
-- [x] Offline tests clearly distinguished from live-provider behavior.
+- [x] Actual LLM client integrated through LangChain and LangGraph.
+- [x] Free-form user instructions interpreted by the model.
+- [x] Tool identity/order selected by the LLM, not a Python checklist.
+- [x] Observations return before subsequent model decisions.
+- [x] Persona, tools, run-local memory/state and decisions identifiable.
+- [x] Eight saved real-provider scenarios, including distinct user tasks.
+- [x] Budget exhaustion and injected failure shown without inventing success.
+- [x] Model prose limitations retained; no edited/fabricated live answers.
 
-## Required before revised submission
+## Submission contents
 
-- [ ] Usable provider credit and an actual successful LLM response.
-- [ ] Saved real multi-step model/tool/observation/final-answer traces.
-- [ ] Different natural-language tasks with observed selected plans.
-- [ ] Real failure/limitation analysis, without forced-success claims.
-- [ ] Updated executed `agentic_system.ipynb`; no stale rule-based narrative.
-- [ ] Updated `module_summary.pdf`, all required sections and in-text citations;
-      at least two credible sources, including one scholarly source.
-- [ ] Revised architecture diagram matching the LLM implementation.
-- [ ] Final actual `pip freeze > requirements.txt`, installation and rerun checks.
-- [ ] Verified secret-free ZIP containing the revised, consistent artifacts.
-- [ ] Edward's personal review/understanding and course AI-policy check.
+- [x] Runnable source, configuration, original public data and attribution.
+- [x] Executed notebook with its own live LLM call loop and ending summary.
+- [x] Revised report: PDF, editable DOCX and Markdown.
+- [x] Required sections, plain-language interpretation, scholarly citation
+  and additional credible references.
+- [x] Architecture figure matches implemented model-directed loop.
+- [x] Actual `pip freeze`, tests and reproduction instructions.
+- [x] No credentials or dependency environments in the intended submission.
 
-The prior PDF/notebook/output bundle is the rejected version, not a fallback
-acceptable submission. Do not label the failed API requests as LLM execution.
+Final packaging and verification results are recorded in `VERIFICATION.md`.
+
+## Edward's actions
+
+- [ ] Read the report, notebook and explanation audit; practice explaining
+  why a fixed safety graph is different from a fixed tool plan.
+- [ ] Confirm compliance with the course's AI-assistance policy and personalize.
+- [ ] Upload the new submission package, not the rejected version.
+- [ ] Click Submit in the classroom and await the actual review.
+
+Do not mark these human actions complete on Edward's behalf.

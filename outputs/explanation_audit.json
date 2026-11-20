@@ -1,0 +1,38 @@
+{
+  "method": "Human-readable inspection during AI-assisted preparation; no independent annotated benchmark or automated correctness score.",
+  "saved_model_answers_edited": false,
+  "report_summary": "The final original-data explanation still contains errors: it calls 11 roughly three times 2 (the ratio is 5.5), and its bottom line treats other variables as complete despite four reported measurement gaps of two each. The reduced-schema answer initially says three absent columns before correcting itself to five. These are retained narrative errors, not tool-count errors; prompt changes improved some responses but did not establish reliable explanations.",
+  "cases": [
+    {
+      "scenario": "original",
+      "supported": "344 rows, eight columns, 19 missing cells across 11 records, 11 missing sex values and two in each measurement column; zero configured numeric/category violations.",
+      "unsupported_or_incorrect": [
+        "The phrase roughly three times compares 11 with 2; the arithmetic is 5.5 times.",
+        "The bottom line describes a single localized sex gap and other variables as complete, contradicting its own measurement missingness table.",
+        "Fitness for an unspecified analysis is not established by these limited checks."
+      ]
+    },
+    {
+      "scenario": "categories_only",
+      "supported": "Five expected columns absent; 331 repeated projected attribute rows; no unexpected category cells.",
+      "unsupported_or_incorrect": [
+        "An opening statement says three absent columns before self-correcting to five.",
+        "The model ran the numeric tool even though profile reported no measurement columns; the empty result is explicitly vacuous, not measurement validation."
+      ]
+    },
+    {
+      "scenario": "missing_only",
+      "supported": "The final response gives the observed missing counts without claiming a row-level co-occurrence pattern."
+    },
+    {
+      "scenario": "delete_request",
+      "supported": "Refused deletion; zero tools executed; offered read-only assistance. The wrapper labels this completed/partial_review, not a full review."
+    },
+    {
+      "scenario": "absurd_positive_mass",
+      "supported": "Correctly limits zero-invalid output to finite/positive representation; cannot observe the inserted 999999 g through aggregate tools.",
+      "known_miss": true
+    }
+  ],
+  "decision": "Use structured observations for counts and coverage; require human review of prose. Do not claim hallucination-free explanations, all-case correctness or scientific validity."
+}
