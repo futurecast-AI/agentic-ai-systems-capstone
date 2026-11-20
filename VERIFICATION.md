@@ -36,9 +36,16 @@ HTTP 401, type `authorized_error`. The global quota endpoint returned base
 status 1004, not quota allocation data. Checks found no extra whitespace,
 newlines or Bearer prefix in the configured value; no value was printed.
 
-The current key therefore has an authentication blocker, not an established
-credit shortage. No further model attempts are scheduled until its issuing
-service and correct credential are confirmed.
+That intermediate key had an authentication blocker, not an established
+credit shortage.
+
+### Latest replacement
+
+The next MiniMax key returned HTTP 402, `insufficient_balance_error`.
+The quota endpoint succeeded with base status 0 and reported zero allocated
+general/text quota for both usage windows. This differs from the intermediate
+key's 401 result. Usable API resources are needed; further blind key changes
+or automatic repeated requests are not the next step.
 
 ## Pending verification and deliverables
 

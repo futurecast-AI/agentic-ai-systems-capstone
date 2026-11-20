@@ -17,7 +17,7 @@
   },
   "keys_configured": ["OPENAI_API_KEY", "MINIMAX_API_KEY"],
   "secrets_logged": false,
-  "replacement_minimax_key": {
+  "intermediate_replacement_minimax_key": {
     "global_text_status": 401,
     "mainland_china_text_status": 401,
     "error_type": "authorized_error",
@@ -27,6 +27,14 @@
     "embedded_newline": false,
     "authenticated": false
   },
-  "action_needed": "Confirm the replacement key's issuing service and authenticated text-API access before rerunning; prior balance results refer to earlier keys.",
+  "latest_minimax_check": {
+    "global_text_status": 402,
+    "error_type": "insufficient_balance_error",
+    "quota_endpoint_status": 200,
+    "quota_base_status": 0,
+    "allocated_text_interval_quota": 0,
+    "allocated_text_weekly_quota": 0
+  },
+  "action_needed": "Make API credit/quota available to the latest MiniMax key, or use funded OpenAI access, before rerunning.",
   "scope": "Sanitized diagnostic record; not successful LLM planning evidence."
 }

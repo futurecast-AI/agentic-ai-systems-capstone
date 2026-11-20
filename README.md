@@ -3,11 +3,11 @@
 **AI Foundations (Edward Hickman) · Udacity · Project 6**
 
 > **Not ready to resubmit yet.** The LLM architecture has been implemented and
-> offline-tested. The replacement MiniMax key is rejected with HTTP 401 at
-> both documented global and mainland-China endpoints. Earlier checks returned
-> OpenAI `insufficient_quota` (429) and, with the previous MiniMax key,
-> `insufficient_balance_error` (402). Authentication must be resolved before
-> making any new credit diagnosis. No successful live response is claimed. The current
+> offline-tested. The latest MiniMax key returns HTTP 402
+> (`insufficient_balance_error`); its quota endpoint succeeds but reports zero
+> allocated text usage. An intermediate key returned 401; that is no longer the
+> latest result. OpenAI previously returned `insufficient_quota` (429).
+> Usable API credit/quota is needed. No successful live response is claimed. The current
 > `module_summary.*`, notebook and `outputs/runs/` still describe the rejected
 > rule-based version and must be rebuilt, not uploaded as the revision.
 
