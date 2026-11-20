@@ -28,6 +28,18 @@ No successful live response or completed model-driven case is claimed.
 Do not reuse failed requests as success evidence. Automatic repeated requests
 will not repair these credit limitations.
 
+### Replacement MiniMax key
+
+A later key replacement changed the error: both documented global
+(`api.minimax.io`) and mainland-China (`api.minimax.cn`) text endpoints returned
+HTTP 401, type `authorized_error`. The global quota endpoint returned base
+status 1004, not quota allocation data. Checks found no extra whitespace,
+newlines or Bearer prefix in the configured value; no value was printed.
+
+The current key therefore has an authentication blocker, not an established
+credit shortage. No further model attempts are scheduled until its issuing
+service and correct credential are confirmed.
+
 ## Pending verification and deliverables
 
 Successful real-provider execution, updated notebook and APA report, revised

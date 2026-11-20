@@ -13,7 +13,14 @@ HTTP 429 (`insufficient_quota`); MiniMax rejected a real request with HTTP 402
 (`insufficient_balance_error`). MiniMax's quota endpoint reported zero allocated
 text usage. Neither provider supplied successful model evidence.
 
-**Pending:** usable API credit with either provider, real model runs, the revised
+The subsequently replaced MiniMax key returns HTTP 401 (`authorized_error`)
+at both the documented global and mainland-China text endpoints. The global
+quota endpoint also reports authentication failure (base status 1004).
+Whitespace/Bearer-prefix formatting checks did not find an issue. The current
+blocker is identifying the issuing service and a working text-API credential;
+the old key's balance result must not be attributed to the replacement.
+
+**Pending:** authenticated API access with usable quota, real model runs, the revised
 executed notebook, updated cited APA report and architecture diagram, final
 environment freeze, updated documentation, PR update and a newly verified ZIP.
 The old report/notebook and `outputs/runs/` describe the rejected rule-based

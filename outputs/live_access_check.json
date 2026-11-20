@@ -17,6 +17,16 @@
   },
   "keys_configured": ["OPENAI_API_KEY", "MINIMAX_API_KEY"],
   "secrets_logged": false,
-  "action_needed": "Provide usable API credit/quota with one provider before rerunning.",
+  "replacement_minimax_key": {
+    "global_text_status": 401,
+    "mainland_china_text_status": 401,
+    "error_type": "authorized_error",
+    "global_quota_base_status": 1004,
+    "surrounding_whitespace": false,
+    "bearer_prefix": false,
+    "embedded_newline": false,
+    "authenticated": false
+  },
+  "action_needed": "Confirm the replacement key's issuing service and authenticated text-API access before rerunning; prior balance results refer to earlier keys.",
   "scope": "Sanitized diagnostic record; not successful LLM planning evidence."
 }

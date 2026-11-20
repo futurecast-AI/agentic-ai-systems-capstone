@@ -3,9 +3,11 @@
 **AI Foundations (Edward Hickman) · Udacity · Project 6**
 
 > **Not ready to resubmit yet.** The LLM architecture has been implemented and
-> offline-tested. Live evaluation is blocked by provider credit: OpenAI returned
-> `insufficient_quota` (HTTP 429); MiniMax returned `insufficient_balance_error`
-> (HTTP 402). No successful live model response is claimed. The current
+> offline-tested. The replacement MiniMax key is rejected with HTTP 401 at
+> both documented global and mainland-China endpoints. Earlier checks returned
+> OpenAI `insufficient_quota` (429) and, with the previous MiniMax key,
+> `insufficient_balance_error` (402). Authentication must be resolved before
+> making any new credit diagnosis. No successful live response is claimed. The current
 > `module_summary.*`, notebook and `outputs/runs/` still describe the rejected
 > rule-based version and must be rebuilt, not uploaded as the revision.
 
