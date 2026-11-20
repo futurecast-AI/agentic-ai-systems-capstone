@@ -1,0 +1,55 @@
+{
+  "started_at_utc": "2026-11-20T03:04:16.324993+00:00",
+  "python": "3.11.18",
+  "implementation_sha256": "f7e55f9283853736e5a0f880ed0198ddbf3a5aec7157ae8cc97a807d79fd875b",
+  "evaluator_sha256": "4259440939614017d774f5414a3df76c9adf0fcb09aa34854353db64dcba53dd",
+  "config": {
+    "dataset_id": "penguins",
+    "relative_path": "data/penguins.csv",
+    "max_bytes": 1000000,
+    "max_rows": 5000,
+    "max_columns": 20,
+    "max_tool_calls": 6,
+    "max_model_turns": 12,
+    "provider": "minimax",
+    "model": "MiniMax-M3",
+    "openai_model": "gpt-4.1-mini",
+    "provider_timeout_seconds": 60,
+    "measurement_columns": [
+      "bill_length_mm",
+      "bill_depth_mm",
+      "flipper_length_mm",
+      "body_mass_g"
+    ],
+    "categories": {
+      "species": [
+        "Adelie",
+        "Chinstrap",
+        "Gentoo"
+      ],
+      "island": [
+        "Biscoe",
+        "Dream",
+        "Torgersen"
+      ],
+      "sex": [
+        "male",
+        "female"
+      ]
+    },
+    "required_columns": [
+      "species",
+      "island",
+      "bill_length_mm",
+      "bill_depth_mm",
+      "flipper_length_mm",
+      "body_mass_g",
+      "sex",
+      "year"
+    ]
+  },
+  "evaluation_scope": "Eight designed development cases; not an independent reliability benchmark.",
+  "completed_at_utc": "2026-11-20T03:05:59.614452+00:00",
+  "scenario_records_written": 8,
+  "provider_response_turns": 35
+}

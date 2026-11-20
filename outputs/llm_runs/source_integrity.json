@@ -1,0 +1,7 @@
+{
+  "source_sha256_before": "f204db2c753b0937caac3cb35258562c14f073e4bbc76be24b4c51ce22767a93",
+  "source_sha256_after": "f204db2c753b0937caac3cb35258562c14f073e4bbc76be24b4c51ce22767a93",
+  "unchanged": true,
+  "scenario_count": 8,
+  "note": "Live behavior may vary; no exact-output or universal-success claim."
+}

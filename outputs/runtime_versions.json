@@ -1,0 +1,7 @@
+{
+  "python": "3.11.18",
+  "langgraph": "1.2.24",
+  "langchain-openai": "1.8.5",
+  "langchain-core": "1.8.4",
+  "pandas": "3.1.1"
+}

@@ -1,0 +1,18 @@
+{
+  "current_live_cases": 8,
+  "current_provider_response_turns": 35,
+  "notebook_code_cells_executed": 9,
+  "notebook_error_outputs": 0,
+  "notebook_live_demo_tool_calls": 2,
+  "notebook_live_demo_model_turns": 3,
+  "working_environment_tests_passed": 52,
+  "clean_python311_tests_passed": 52,
+  "implementation_and_evaluator_hashes_match": true,
+  "original_dataset_unchanged": true,
+  "pdf_pages": 9,
+  "pdf_text_within_page_bounds": true,
+  "required_report_sections_present": true,
+  "docx_opens": true,
+  "current_credentials_absent_from_repository_files": true,
+  "scope": "Artifact/software checks, not a claim of all-case reasoning accuracy or course acceptance."
+}

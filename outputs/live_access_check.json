@@ -1,0 +1,51 @@
+{
+  "successful_live_response": false,
+  "openai": {
+    "text_api_hostname": "api.openai.com",
+    "status": 429,
+    "error_type": "insufficient_quota",
+    "error_code": "credit_balance_exhausted"
+  },
+  "minimax": {
+    "text_api_hostname": "api.minimax.io",
+    "status": 402,
+    "error_type": "insufficient_balance_error",
+    "quota_endpoint_status": 200,
+    "quota_base_status": 0,
+    "allocated_text_interval_quota": 0,
+    "allocated_text_weekly_quota": 0
+  },
+  "keys_configured": ["OPENAI_API_KEY", "MINIMAX_API_KEY"],
+  "secrets_logged": false,
+  "intermediate_replacement_minimax_key": {
+    "global_text_status": 401,
+    "mainland_china_text_status": 401,
+    "error_type": "authorized_error",
+    "global_quota_base_status": 1004,
+    "surrounding_whitespace": false,
+    "bearer_prefix": false,
+    "embedded_newline": false,
+    "authenticated": false
+  },
+  "previous_minimax_check": {
+    "global_text_status": 402,
+    "error_type": "insufficient_balance_error",
+    "quota_endpoint_status": 200,
+    "quota_base_status": 0,
+    "allocated_text_interval_quota": 0,
+    "allocated_text_weekly_quota": 0
+  },
+  "latest_connection_test": {
+    "provider_response_received": true,
+    "has_content": true,
+    "has_tool_calls": false,
+    "provider_model": "MiniMax-M3"
+  },
+  "current_live_evaluation": {
+    "scenario_records": 8,
+    "provider_response_turns": 35,
+    "scope": "Current real-provider development cases; not all-case correctness."
+  },
+  "action_needed": "Access blocker cleared. Review the revised submission and retained explanation limitations.",
+  "scope": "Sanitized diagnostic record; not successful LLM planning evidence."
+}
