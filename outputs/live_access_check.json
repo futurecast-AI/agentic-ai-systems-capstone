@@ -1,0 +1,22 @@
+{
+  "successful_live_response": false,
+  "openai": {
+    "text_api_hostname": "api.openai.com",
+    "status": 429,
+    "error_type": "insufficient_quota",
+    "error_code": "credit_balance_exhausted"
+  },
+  "minimax": {
+    "text_api_hostname": "api.minimax.io",
+    "status": 402,
+    "error_type": "insufficient_balance_error",
+    "quota_endpoint_status": 200,
+    "quota_base_status": 0,
+    "allocated_text_interval_quota": 0,
+    "allocated_text_weekly_quota": 0
+  },
+  "keys_configured": ["OPENAI_API_KEY", "MINIMAX_API_KEY"],
+  "secrets_logged": false,
+  "action_needed": "Provide usable API credit/quota with one provider before rerunning.",
+  "scope": "Sanitized diagnostic record; not successful LLM planning evidence."
+}

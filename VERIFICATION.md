@@ -1,55 +1,38 @@
-# Verification record
+# Verification record — LLM revision, live execution blocked
 
-## Local checks
+## Offline checks
 
-`python -m pytest tests -q`: **33 passed**; saved in `outputs/validation.txt`.
+The revised suite exercises the actual LangGraph loop using explicitly
+scripted model responses. It tests alternative selected tool sequences and
+narrow requests, returned observations, fresh memory, source/fixture
+immutability, allowed tools/arguments, dependency guards, model/tool budgets,
+error observations, no silent retries, scoped completion and provider/key
+separation. See `outputs/validation.txt` for the current executed test count.
 
-Checks cover original-data counts and trace order, blocked structured and
-free-form requests, every supported call budget, conditional numeric-tool
-skipping, fault stopping, numeric invalid values, instruction-like cell values,
-fresh per-run memory, unchanged fixtures, shape guards, source-tamper detection,
-unknown-tool rejection, exact scenario replay, notebook execution, required
-report sections, diagram presence, five-sentence summary, jargon-free plain
-explanation, actual freeze and original APA-template preservation.
-
-The test suite retains the **known semantic miss**: 999,999 g is positive and
-therefore not flagged by the narrow numeric rule. Its passing test documents
-that limitation; it is not successful anomaly detection.
-
-## Independent reproduction
-
-Created a new Python 3.11.18 environment from `requirements.txt` and a clean
-directory containing only the implementation, evaluation harness, configuration,
-notebook and original CSV. No previous outputs were copied.
-
-Ran the notebook top to bottom and compared every generated file in
-`outputs/runs/` against the originals. All twelve scenario JSON files,
-`source_integrity.json` and `evaluation_summary.csv` matched byte-for-byte.
-The original source remains at SHA-256
+These unit tests establish specified software behavior, not an LLM's actual
+planning quality. The original source remains fingerprinted at
 `f204db2c753b0937caac3cb35258562c14f073e4bbc76be24b4c51ce22767a93`.
 
-This verifies the documented stack, not identical results under every
-possible dependency, configuration or operating system.
+## Provider checks
 
-## Visual review
+OpenAI: configured key was passed only to `api.openai.com`. The live runner's
+eight attempts returned no AI message. A bounded diagnostic established HTTP 429,
+type `insufficient_quota`, code `credit_balance_exhausted`.
 
-Viewed the architecture diagram and rendered all **ten report pages**.
-Checked component names, reasoning flow, state, tool/observation arrows,
-blocked-request path and terminal output. No clipping or missing pages found.
-The plain-language section is entirely on **page 5**.
+MiniMax: configured key was passed to the documented MiniMax endpoint.
+The bounded text probe returned HTTP 402, type `insufficient_balance_error`.
+The documented quota endpoint returned success but zero allocated text usage.
+No key values, partial values or request authorization headers are saved.
 
-The diagram shows the implemented rule loop, not a hypothetical LLM system.
-The report uses four cited credible sources, including the scholarly
-Wooldridge and Jennings article, and describes only actual implemented safeguards.
+No successful live response or completed model-driven case is claimed.
+Do not reuse failed requests as success evidence. Automatic repeated requests
+will not repair these credit limitations.
 
-## Scope and limitations
+## Pending verification and deliverables
 
-No paid API or secrets are used. The agent has no network, shell or data-edit
-capability, but is not isolated in an OS security sandbox. It has no wall-clock
-timeout, general planning, cross-run learning or scientific plausibility rules.
-Dataset/intent allowlists and six-call ceiling are application restrictions,
-not comprehensive security assurance.
+Successful real-provider execution, updated notebook and APA report, revised
+diagram, final clean-environment replay and new submission ZIP are pending.
+Legacy reports, notebook outputs and `outputs/runs` belong to the rejected
+rule-based architecture. They are not evidence for the new agent.
 
-No GitHub Actions workflow is configured. Local checks do not imply CI passed.
-Remote head, PR state and required checks are checked separately after publication.
-No classroom submission or reviewer acceptance has occurred.
+No classroom submission, reviewer pass, PR merge or CI pass is claimed.

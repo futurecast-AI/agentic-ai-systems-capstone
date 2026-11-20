@@ -22,5 +22,8 @@ The official CSV is included unchanged. Evaluation fixtures are explicitly
 documented copies altered in memory by `evaluate_agent.py`; they do not replace
 the source file and are not presented as real field measurements.
 
-The agent makes no network call. To recover a missing source file, manually
-download the exact pinned URL above and check its SHA-256. No API key is required.
+The read-only dataset tools make no network call. The revised agent's LLM
+client sends the user task and aggregate tool observations to the explicitly
+selected MiniMax or OpenAI endpoint, using a securely supplied provider key.
+To recover a missing source file, manually download the exact pinned URL above
+and check its SHA-256.

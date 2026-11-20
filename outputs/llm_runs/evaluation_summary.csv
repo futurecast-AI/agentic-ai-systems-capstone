@@ -1,0 +1,9 @@
+scenario,status,disposition,model_turns,tool_calls,selected_tools,findings,evidence_type
+original,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
+missing_only,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
+duplicates_only,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
+categories_only,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
+low_budget,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
+tool_failure,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
+delete_request,model_failed,incomplete_review,1,0,,,provider_attempt_without_response
+absurd_positive_mass,model_failed,incomplete_review,1,0,,,provider_attempt_without_response

@@ -1,36 +1,29 @@
-# Agentic AI Systems submission checklist
+# Revised submission checklist — not ready for upload
 
-## Included and verified
+## Implemented
 
-- [x] Runnable `agentic_system.py` and executed `agentic_system.ipynb`.
-- [x] Defined purpose, persona, single-agent choice, scope and boundaries.
-- [x] Explicit decision logic, per-run state, tool invocation and conditional selection.
-- [x] Six read-only tools and bounded execution.
-- [x] Observable aggregate outputs and short policy-reason traces.
-- [x] Real original-data run plus twelve declared representative scenarios.
-- [x] Blocked requests, budget exhaustion, simulated failure and known semantic miss.
-- [x] No false claim of general reasoning, 100% detection or comprehensive safety.
-- [x] Five-sentence implementation/notebook ending summary.
-- [x] Ten-page `module_summary.pdf` with all eight required sections.
-- [x] Architecture diagram embedded in report and supplied separately as PNG.
-- [x] Four credible references, including scholarly agent-architecture research.
-- [x] APA citations and case-specific ethics, limitations and future improvements.
-- [x] Plain-language explanation on page 5, using actual counts and failure example.
-- [x] Actual `pip freeze` requirements; no API keys or credentials.
-- [x] Configuration, original public data, pinned source/hash and attribution.
-- [x] Thirty-three tests passed and all scenario files reproduced in a fresh environment.
+- [x] Real LLM client integrated with LangGraph; not an unused API wrapper.
+- [x] Natural-language instructions enter the model context.
+- [x] Model-selected tools; no predefined analytical checking sequence.
+- [x] Tool observations return to the LLM before its next action.
+- [x] Persona, message memory, working state and action trace are identifiable.
+- [x] Read-only capabilities, validation, dependency and budget guards.
+- [x] Separate MiniMax/OpenAI configuration and secret names.
+- [x] Offline tests clearly distinguished from live-provider behavior.
 
-## Before submitting
+## Required before revised submission
 
-- [ ] Edward reviews, understands and personalizes the AI-assisted work in line
-      with his course policy.
-- [ ] Edward uploads the ZIP according to classroom instructions; nothing is
-      automatically submitted.
-- [ ] If a repository URL is required, provide the draft PR/development branch
-      until merging is approved. Initial `main` alone does not contain this work.
+- [ ] Usable provider credit and an actual successful LLM response.
+- [ ] Saved real multi-step model/tool/observation/final-answer traces.
+- [ ] Different natural-language tasks with observed selected plans.
+- [ ] Real failure/limitation analysis, without forced-success claims.
+- [ ] Updated executed `agentic_system.ipynb`; no stale rule-based narrative.
+- [ ] Updated `module_summary.pdf`, all required sections and in-text citations;
+      at least two credible sources, including one scholarly source.
+- [ ] Revised architecture diagram matching the LLM implementation.
+- [ ] Final actual `pip freeze > requirements.txt`, installation and rerun checks.
+- [ ] Verified secret-free ZIP containing the revised, consistent artifacts.
+- [ ] Edward's personal review/understanding and course AI-policy check.
 
-Keep the notebook, Python modules, configuration and data folders together.
-The ZIP includes everything required for agent execution; no paid service,
-secret or separate dataset download is needed. Rebuilding the report, rather
-than opening the provided PDF, additionally needs the original APA template
-and LibreOffice.
+The prior PDF/notebook/output bundle is the rejected version, not a fallback
+acceptable submission. Do not label the failed API requests as LLM execution.

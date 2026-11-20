@@ -1,55 +1,65 @@
-# Bounded data-quality review agent — design before implementation
+# LLM-powered review agent — reviewer remediation plan
 
-Single-agent, deterministic Python sense/decide/act workflow. It is a rule-based
-agent with limited autonomy, not an LLM or a general reasoning system.
-The assignment explicitly accepts reasoning **or decision logic** and optional
-LLM use; no API, new agent framework or credentials are required.
+## Why the architecture changed
 
-Persona: cautious data-quality reviewer. Goal: inspect one registered public
-Palmer Penguins CSV, choose applicable checks and return evidence for a human.
-New task, data and workflow: no agent or dataset is reused from earlier capstones.
+The November 19 submission was unable to be reviewed because its Python
+conditions chose a predefined tool sequence. That rule-only design did not meet
+the reviewer's requirement for an actual LLM agent. This revision replaces that
+controller; renaming the old workflow or adding an unused model client is not a fix.
 
-Tools: load an allowlisted local dataset, profile schema, count missing values,
-check repeated rows, validate numeric measurement representation and positivity,
-check known categorical values. All tools are read-only. Dataset strings are data,
-not executable instructions. No arbitrary paths, network, shell, eval, SQL,
-deletions, imputation, file edits or external messages exist in the agent.
-The evaluation harness, not the agent, writes outputs and creates test fixtures.
+## Persona, goal and authority
 
-Limited state: per-run observations, completed-tool names, bounded event trace,
-call count and terminal status; working DataFrame remains in local run memory.
-No cross-run memory or raw-row logging. Reset state for every request.
+One cautious data-quality reviewer interprets a natural-language instruction about
+the registered public Palmer Penguins CSV. It chooses relevant read-only checks
+and explains evidence to a human. A single agent suffices for this bounded task;
+multi-agent delegation would add coordination without demonstrated benefit.
+The public data and task remain distinct from earlier course capstones.
 
-Decision loop: validate request → load → profile → missingness → duplicates →
-numeric checks if expected measurement columns exist → category checks if expected
-categorical columns exist → finish. Record conditional skips; stop on any tool
-failure or exhausted call budget. Maximum six tool invocations. Use short
-explicit policy reasons, not hidden chain-of-thought.
+## Implemented architecture
 
-Safeguards: allowlist only `penguins`, intent only `review`, size <=1 MB,
-rows <=5,000, columns <=20, verify original source SHA-256, bounded dispatch,
-missing checks never called “passed,” no data changes, aggregate logging,
-human-review disposition if findings exist. A checks-clear result means only
-that configured checks found nothing; never certify all data quality.
+LangGraph alternates `llm_decision` with `read_only_tool`. LangChain's
+`ChatOpenAI` binds six tool schemas to the configured model (default MiniMax-M3,
+with explicitly selectable OpenAI gpt-4.1-mini).
+The LLM receives the user task, selects a tool and supplies a short public action
+justification. Its ToolMessage observation returns to the same model context.
+The model then chooses another tool or a final answer. The application supplies
+no ordered list of checks and does not select missingness/duplicates/categories
+from Python keyword conditions.
 
-Evaluation cases fixed before implementation:
+The only conditional routing determines whether the LLM requested a tool or
+finished. Preconditions and limits are safety enforcement, not task planning.
+Loading precedes data use; numeric/categories require profile evidence.
+Tool failure becomes an observation the LLM can explain; no further tools run
+after failure. Invalid names/arguments, repeated calls or excess budgets stop
+without substituting a scripted fallback.
 
-1. Unmodified source: complete, missing data sent for human review.
-2. Complete-case subset (explicit fixture): complete, configured checks clear.
-3. Append duplicate row (explicit fixture): complete, duplicate flagged.
-4. Negative body mass (explicit fixture): complete, numeric issue flagged.
-5. Categories-only subset: complete, numeric check skipped, schema held for review.
-6. Unsupported dataset/path request: blocked before any tool.
-7. Request to delete rows: blocked before any tool.
-8. Small tool budget: incomplete, never asserted clean.
-9. Injected numeric-tool failure: failed, subsequent tools not run.
-10. Empty frame fixture: failed safely after bounded calls.
-11. Instruction-like category string: treated as data; category issue flagged.
-12. Positive but absurd mass: demonstrates known limitation—positivity checks miss
-    scientifically implausible values. Do not hide it or change policy to pass.
+## Memory and transparency
 
-Fixtures are transparent deterministic alterations of the public data solely
-for exercising branches; they are not presented as real field observations.
-No production accuracy or broad robustness claim from this small designed suite.
-Provide actual traces, independent assertions, architecture diagram, a finalized
-notebook with 4–6 sentence ending summary, cited APA report and actual pip freeze.
+Each run gets fresh LangGraph message state, observations, completed tools,
+working DataFrame, tool/model counters and a trace. There is no cross-run
+persistent memory. Logged model action summaries and final explanations are
+public outputs, not hidden chain-of-thought or proof of faithful internal reasoning.
+Only aggregate results go to the provider; raw dataset cell strings do not.
+
+## Safeguards and residual risks
+
+Allowlisted dataset/tools, parameter validation, six tool calls, eight model
+turns, sixty-second per-request provider timeout, zero automatic provider retries, source hash,
+size bounds and no edit/shell tools constrain execution. Partial evidence cannot
+be labeled a full configured review by the result wrapper, even if the model
+finishes early. Model narratives remain fallible and need human checking.
+
+The model uses a network API; the read-only dataset tools do not. Provider costs,
+data disclosure, service failures, nondeterminism and prompt injection remain
+relevant. There is no OS isolation, end-to-end runtime guarantee, certified
+security or scientific validity. Positivity-only numeric rules can still miss
+an absurd positive mass; adding an LLM does not make unavailable evidence visible.
+
+## Verification and pending evidence
+
+Offline tests use explicitly scripted model responses to test control and safety.
+They are not evidence of an LLM planning successfully. The live evaluation script
+uses only real provider responses and saves different natural-language requests,
+model-selected tool paths, observations and final answers to `outputs/llm_runs`.
+The report, notebook and resubmission ZIP must be rebuilt from those real runs.
+Do not present the old rule-based outputs as evidence of the new architecture.
